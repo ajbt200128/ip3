@@ -12,7 +12,7 @@ readme = "README.md"
 [dependencies]
 clap = { version = "4.4.6", features = ["derive"] }
 colored = "2.0.4"
-ip3 = { path = "../ip3_lib"}
+ip3 = { path = "../ip3_lib", version = "1.0.0"}
 local-ip-address = "0.5.6"
 public-ip = { version = "0.2.2", features = ["dns-resolver"] }
 tokio = { version = "1.32.0", features = ["macros"] }
