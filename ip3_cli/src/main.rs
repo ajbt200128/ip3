@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+mod commands;
+
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -12,10 +14,25 @@ struct Cli {
 }
 #[derive(Subcommand)]
 enum Commands {
-    ///
-    Show {},
+    /// Display current ip3
+    Me {
+        #[arg(short, long)]
+        json: bool,
+    },
 }
 
-fn main() {
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() {
+    let cli = Cli::parse();
+
+    match &cli.command {
+        Some(Commands::Me {
+            json
+        }) => {
+            commands::me::display_me(*json).await;
+        }
+        None => {
+            println!("No command! Exiting...");
+        }
+    }
 }

@@ -8,7 +8,58 @@ macro_rules! wordlist {
     };
 }
 
-type Ip3 = (String, String, String);
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Ip3(String, String, String);
+
+impl std::fmt::Display for Ip3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.0, self.1, self.2)
+    }
+}
+
+impl From<(String, String, String)> for Ip3 {
+    fn from(words: (String, String, String)) -> Self {
+        Self(words.0, words.1, words.2)
+    }
+}
+
+impl From<(&str, &str, &str)> for Ip3 {
+    fn from(words: (&str, &str, &str)) -> Self {
+        Self(
+            words.0.to_string(),
+            words.1.to_string(),
+            words.2.to_string(),
+        )
+    }
+}
+
+impl From<Ip3> for String {
+    fn from(ip: Ip3) -> Self {
+        format!("{}", ip)
+    }
+}
+
+impl From<String> for Ip3 {
+    fn from(ip: String) -> Self {
+        let mut ip = ip.split('.');
+        let word1 = ip.next().unwrap();
+        let word2 = ip.next().unwrap();
+        let word3 = ip.next().unwrap();
+        Self(word1.to_string(), word2.to_string(), word3.to_string())
+    }
+}
+
+impl From<Ipv4Addr> for Ip3 {
+    fn from(ip: Ipv4Addr) -> Self {
+        ipv4_to_ip3(ip)
+    }
+}
+
+impl From<Ip3> for Ipv4Addr {
+    fn from(ip: Ip3) -> Self {
+        ip3_to_ipv4(&ip)
+    }
+}
 
 pub const WORDLIST_EN: [&str; 2048] = wordlist!("../wordlists/english.txt");
 
@@ -68,7 +119,7 @@ pub fn ipv4_to_ip3(ip: Ipv4Addr) -> Ip3 {
     let word2: &str = WORDLIST[word2_bytes.load::<usize>()];
     let word3: &str = WORDLIST[word3_bytes.load::<usize>()];
 
-    (word1.to_string(), word2.to_string(), word3.to_string())
+    (word1.to_string(), word2.to_string(), word3.to_string()).into()
 }
 
 #[cfg(test)]
@@ -84,15 +135,15 @@ mod tests {
     #[test]
     fn test_words_to_ip() {
         assert_eq!(
-            ip3_to_ipv4(&("abandon".into(), "abandon".into(), "abandon".into())),
+            ip3_to_ipv4(&("abandon", "abandon", "abandon").into()),
             Ipv4Addr::new(0, 0, 0, 0)
         );
         assert_eq!(
-            ip3_to_ipv4(&("ability".into(), "abandon".into(), "display".into())),
+            ip3_to_ipv4(&("ability", "abandon", "display").into()),
             Ipv4Addr::new(127, 0, 0, 1)
         );
         assert_eq!(
-            ip3_to_ipv4(&("cage".into(), "advice".into(), "above".into())),
+            ip3_to_ipv4(&("cage", "advice", "above").into()),
             Ipv4Addr::new(1, 1, 1, 1)
         )
     }
@@ -101,15 +152,15 @@ mod tests {
     fn test_ip_to_words() {
         assert_eq!(
             ipv4_to_ip3(Ipv4Addr::new(0, 0, 0, 0)),
-            ("abandon".into(), "abandon".into(), "abandon".into())
+            ("abandon", "abandon", "abandon").into()
         );
         assert_eq!(
             ipv4_to_ip3(Ipv4Addr::new(127, 0, 0, 1)),
-            ("ability".into(), "abandon".into(), "display".into())
+            ("ability", "abandon", "display").into()
         );
         assert_eq!(
             ipv4_to_ip3(Ipv4Addr::new(1, 1, 1, 1)),
-            ("cage".into(), "advice".into(), "above".into())
+            ("cage", "advice", "above").into()
         )
     }
 }
